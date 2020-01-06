@@ -1,0 +1,236 @@
+{
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "REST endpoints for integrating with the \n\t\t\t\t\t\t\t\t\tback-end system.",
+    "version" : "1.0",
+    "title" : "Backend API"
+  },
+  "schemes" : [ "http", "https" ],
+  "paths" : {
+    "/balances/aggregators" : {
+      "get" : {
+        "operationId" : "getBalanceSummaries",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "date",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "balanceonly",
+          "in" : "query",
+          "required" : false,
+          "type" : "boolean",
+          "default" : false
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "array",
+              "items" : {
+                "$ref" : "#/definitions/BalanceSummary"
+              }
+            }
+          }
+        }
+      },
+      "put" : {
+        "operationId" : "createBalance",
+        "consumes" : [ "application/json" ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/balances/aggregators/adjustments/{adjustment-id}/status" : {
+      "put" : {
+        "operationId" : "updateAdjustmentStatus",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "adjustment-id",
+          "in" : "path",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/BalanceAdjustment"
+            }
+          }
+        }
+      }
+    },
+    "/balances/aggregators/{aggregator-id}" : {
+      "get" : {
+        "operationId" : "getAggregatorSummary",
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "aggregator-id",
+          "in" : "path",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        }, {
+          "name" : "date",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/BalanceSummary"
+            }
+          }
+        }
+      }
+    },
+    "/balances/aggregators/{aggregator-id}/adjustments" : {
+      "post" : {
+        "operationId" : "insertBalanceAdjustment",
+        "consumes" : [ "application/json" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "aggregator-id",
+          "in" : "path",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "$ref" : "#/definitions/BalanceAdjustment"
+            }
+          }
+        }
+      }
+    },
+    "/balances/aggregators/{aggregator-id}/report" : {
+      "get" : {
+        "operationId" : "getBalanceReport",
+        "produces" : [ "text/plain" ],
+        "parameters" : [ {
+          "name" : "aggregator-id",
+          "in" : "path",
+          "required" : true,
+          "type" : "integer",
+          "format" : "int64"
+        }, {
+          "name" : "startdate",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "enddate",
+          "in" : "query",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "200" : {
+            "description" : "successful operation",
+            "schema" : {
+              "type" : "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions" : {
+    "BalanceAdjustment" : {
+      "type" : "object",
+      "properties" : {
+        "id" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "amount" : {
+          "type" : "number"
+        },
+        "currency" : {
+          "type" : "string"
+        },
+        "userId" : {
+          "type" : "string"
+        },
+        "state" : {
+          "type" : "string",
+          "enum" : [ "SUCCESSFUL", "UNSUCCESSFUL", "PENDING", "CANCELLED", "TRANSFERRED", "AVAILABLE", "FLOAT_OUTAGE", "ON_HOLD", "UNKNOWN" ]
+        },
+        "note" : {
+          "type" : "string"
+        },
+        "dateCreated" : {
+          "type" : "string",
+          "format" : "date-time"
+        },
+        "dateUpdated" : {
+          "type" : "string",
+          "format" : "date-time"
+        }
+      }
+    },
+    "BalanceSummary" : {
+      "type" : "object",
+      "properties" : {
+        "institutionId" : {
+          "type" : "integer",
+          "format" : "int64"
+        },
+        "institutionName" : {
+          "type" : "string"
+        },
+        "institutionType" : {
+          "type" : "string",
+          "enum" : [ "AGGREGATOR", "CASHOUT" ]
+        },
+        "balance" : {
+          "type" : "number"
+        },
+        "currency" : {
+          "type" : "string"
+        },
+        "totals" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SummaryStateTotal"
+          }
+        },
+        "totalsAtDate" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/SummaryStateTotal"
+          }
+        },
+        "adjustments" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/BalanceAdjustment"
+          }
+        }
+      }
+    },
+    "SummaryStateTotal" : {
+      "type" : "object",
+      "properties" : {
+        "state" : {
+          "type" : "string",
+          "enum" : [ "SUCCESSFUL", "UNSUCCESSFUL", "PENDING", "CANCELLED", "TRANSFERRED", "AVAILABLE", "FLOAT_OUTAGE", "ON_HOLD", "UNKNOWN" ]
+        },
+        "amount" : {
+          "type" : "number"
+        }
+      }
+    }
+  }
+}
